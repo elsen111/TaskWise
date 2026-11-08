@@ -94,7 +94,8 @@ public class AuthServiceImpl implements AuthService {
         return createAuthResponse(principal, user);
     }
 
-    @Override public UserResponse me(UserPrincipal userPrincipal) {
+    @Override
+    public UserResponse me(UserPrincipal userPrincipal) {
 
         UserEntity user = userRepository.findById(userPrincipal.getId())
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + userPrincipal.getId()));
