@@ -1,32 +1,34 @@
 package com.todobackend.controller;
 
 import com.todobackend.common.dto.ApiResponse;
+import com.todobackend.dto.request.ConfirmEmailChangeRequest;
+import com.todobackend.dto.request.EmailChangeRequest;
 import com.todobackend.dto.request.UpdateFullNameRequest;
 import com.todobackend.dto.response.UserResponse;
 import com.todobackend.security.principal.UserPrincipal;
+import com.todobackend.service.EmailChangeService;
 import com.todobackend.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(
         name = "Profile",
         description = "Endpoints for profile management"
 )
 @RestController
-@RequestMapping("/profile")
+@RequestMapping("api/v1/profile")
 @RequiredArgsConstructor
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final EmailChangeService emailChangeService;
 
     @Operation(
             summary = "Update the full name",
@@ -48,6 +50,49 @@ public class ProfileController {
                 )
         );
 
+    }
+
+    @Operation(
+            summary = "Request an email change.",
+            description = "Sends an email verification link to the new email."
+    )
+    @PostMapping("/email/change")
+    public ResponseEntity<ApiResponse<Void>> requestEmailChange(
+            @AuthenticationPrincipal UserPrincipal authenticatedUser,
+            @Valid @RequestBody EmailChangeRequest request
+    ) {
+
+        emailChangeService.requestEmailChange(
+                authenticatedUser,
+                request
+        );
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Verification email sent",
+                        null
+                )
+        );
+    }
+
+    @Operation(
+            summary = "Confirms the new email.",
+            description = "Open the confirmation page in frontend UI and confirms the new email."
+    )
+    @SecurityRequirements
+    @PostMapping("/email/confirm")
+    public ResponseEntity<ApiResponse<Void>> confirmEmailChange(
+            @Valid @RequestBody ConfirmEmailChangeRequest request
+    ) {
+
+        emailChangeService.confirmEmailChange(request.token());
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Email changed successfully",
+                        null
+                )
+        );
     }
 
 }

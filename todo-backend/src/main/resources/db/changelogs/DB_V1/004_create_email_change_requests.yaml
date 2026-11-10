@@ -1,0 +1,67 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004_create_email_change_requests
+      author: elsen111
+      changes:
+        - createTable:
+            tableName: email_change_requests
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_email_change_user
+                    references: users(id)
+                    deleteCascade: true
+
+              - column:
+                  name: new_email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: token_hash
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: expires_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: used_at
+                  type: TIMESTAMP WITH TIME ZONE
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - createIndex:
+            tableName: email_change_requests
+            indexName: idx_email_change_user
+            columns:
+              - column:
+                  name: user_id
+
+        - createIndex:
+            tableName: email_change_requests
+            indexName: idx_email_change_expiration
+            columns:
+              - column:
+                  name: expires_at
