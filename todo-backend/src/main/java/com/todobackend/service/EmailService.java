@@ -8,4 +8,6 @@ public interface EmailService {
 
     void sendEmailChangeNotification(String oldEmail, String newEmail);
 
+    void sendPasswordUpdateNotification(String recipient);
+
 }
