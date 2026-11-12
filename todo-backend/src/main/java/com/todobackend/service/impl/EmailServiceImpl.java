@@ -15,6 +15,11 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -147,6 +152,40 @@ public class EmailServiceImpl implements EmailService {
         sendEmail(
                 oldEmail,
                 "Your account email address was changed",
+                textContent,
+                htmlContent
+        );
+    }
+
+    @Override
+    public void sendPasswordUpdateNotification(String recipient) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
+        String formattedDate = ZonedDateTime.now(ZoneId.of("Asia/Baku")).format(formatter);
+
+        Context context = new Context();
+        context.setVariable("date", formattedDate);
+        context.setVariable("activity",  "Password changed");
+        context.setVariable("account", recipient);
+
+        String htmlContent = processTemplate(
+                "email/password-change-notification",
+                context
+        );
+
+        String textContent = """
+                Your account password has been changed.
+
+                Date: %s
+                Activity: Password changed
+                Account: %s
+
+                If you did not make this change, contact our support team immediately.
+                """.formatted(formattedDate, recipient);
+
+        sendEmail(
+                 recipient,
+                "Your account password has been changed",
                 textContent,
                 htmlContent
         );

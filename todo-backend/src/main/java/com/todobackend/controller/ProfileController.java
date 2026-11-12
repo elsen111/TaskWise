@@ -1,6 +1,7 @@
 package com.todobackend.controller;
 
 import com.todobackend.common.dto.ApiResponse;
+import com.todobackend.dto.request.ChangePasswordRequest;
 import com.todobackend.dto.request.ConfirmEmailChangeRequest;
 import com.todobackend.dto.request.EmailChangeRequest;
 import com.todobackend.dto.request.UpdateFullNameRequest;
@@ -57,6 +58,7 @@ public class ProfileController {
             description = "Sends an email verification link to the new email."
     )
     @PostMapping("/email/change")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> requestEmailChange(
             @AuthenticationPrincipal UserPrincipal authenticatedUser,
             @Valid @RequestBody EmailChangeRequest request
@@ -93,6 +95,29 @@ public class ProfileController {
                         null
                 )
         );
+    }
+
+
+    @Operation(
+            summary = "Update the account password",
+            description = "Replaces the old password with the new one."
+    )
+    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("/password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @AuthenticationPrincipal UserPrincipal authenticatedUser,
+            @RequestBody @Valid ChangePasswordRequest request
+    ) {
+
+        profileService.changePassword(authenticatedUser, request);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Password changed successfully",
+                        null
+                )
+        );
+
     }
 
 }
