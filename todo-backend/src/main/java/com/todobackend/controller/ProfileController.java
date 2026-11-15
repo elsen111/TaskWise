@@ -1,10 +1,7 @@
 package com.todobackend.controller;
 
 import com.todobackend.common.dto.ApiResponse;
-import com.todobackend.dto.request.ChangePasswordRequest;
-import com.todobackend.dto.request.ConfirmEmailChangeRequest;
-import com.todobackend.dto.request.EmailChangeRequest;
-import com.todobackend.dto.request.UpdateFullNameRequest;
+import com.todobackend.dto.request.*;
 import com.todobackend.dto.response.UserResponse;
 import com.todobackend.security.principal.UserPrincipal;
 import com.todobackend.service.EmailChangeService;
@@ -114,6 +111,29 @@ public class ProfileController {
         return ResponseEntity.ok(
                 ApiResponse.success(
                         "Password changed successfully",
+                        null
+                )
+        );
+
+    }
+
+
+    @Operation(
+            summary = "Delete the account.",
+            description = "Deletes the current user's account and cleans all records related to it inside the database."
+    )
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> deleteAccount(
+            @AuthenticationPrincipal UserPrincipal authenticatedUser,
+            @RequestBody @Valid DeleteProfileRequest request
+    ) {
+
+        profileService.deleteProfile(authenticatedUser, request);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Account deleted successfully.",
                         null
                 )
         );

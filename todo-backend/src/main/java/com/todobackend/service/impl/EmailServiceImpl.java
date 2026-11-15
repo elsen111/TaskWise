@@ -191,6 +191,40 @@ public class EmailServiceImpl implements EmailService {
         );
     }
 
+    @Override public void sendProfileDeletionNotification(String recipient) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
+        String formattedDate = ZonedDateTime.now(ZoneId.of("Asia/Baku")).format(formatter);
+
+        Context context = new Context();
+        context.setVariable("date", formattedDate);
+        context.setVariable("activity",  "Account deletion.");
+        context.setVariable("account", recipient);
+
+        String htmlContent = processTemplate(
+                "email/profile-deletion-notification",
+                context
+        );
+
+        String textContent = """
+                Your account has been deleted.
+
+                Date: %s
+                Activity: Account deleted
+                Account: %s
+                
+                If you did not make this change, contact our support team immediately.
+                """.formatted(formattedDate, recipient);
+
+        sendEmail(
+                recipient,
+                "Your account has been deleted",
+                textContent,
+                htmlContent
+        );
+
+    }
+
     private String processTemplate(String templateName, Context context) {
         return templateEngine.process(templateName, context);
     }

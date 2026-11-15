@@ -10,4 +10,6 @@ public interface EmailService {
 
     void sendPasswordUpdateNotification(String recipient);
 
+    void sendProfileDeletionNotification(String recipient);
+
 }
