@@ -1,6 +1,7 @@
 package com.todobackend.service.impl;
 
 import com.todobackend.dto.request.ChangePasswordRequest;
+import com.todobackend.dto.request.DeleteProfileRequest;
 import com.todobackend.dto.request.UpdateFullNameRequest;
 import com.todobackend.dto.response.UserResponse;
 import com.todobackend.entity.UserEntity;
@@ -71,5 +72,29 @@ public class ProfileServiceImpl implements ProfileService {
         refreshTokenService.revokeAllUserRefreshTokens(currentUser.getId());
 
         emailService.sendPasswordUpdateNotification(currentUser.getEmail());
+    }
+
+    @Transactional
+    @Override
+    public void deleteProfile(
+            UserPrincipal authenticatedUser,
+            DeleteProfileRequest request
+    ) {
+
+        UserEntity currentUser = userRepository.findById(authenticatedUser.getId())
+                .orElseThrow(
+                        () -> new NotFoundException("User not found with id " + authenticatedUser.getId())
+                );
+
+        if(!passwordEncoder.matches(request.password(), currentUser.getPasswordHash())) {
+            throw new InvalidCredentialsException("Current password is incorrect!");
+        }
+
+        String profileEmail = currentUser.getEmail();
+
+        userRepository.delete(currentUser);
+
+        emailService.sendProfileDeletionNotification(profileEmail);
+
     }
 }
